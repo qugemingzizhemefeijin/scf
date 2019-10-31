@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<configuration>
+
+<!-- service name -->
+<property>
+<name>scf.service.name</name>
+<value>mimi</value>
+</property>
+
+<!-- socket server listent port -->
+<property>
+<name>scf.server.tcp.listenPort</name>
+<value>19000</value>
+</property>
+
+<!-- telnet server listent port -->
+<property>
+<name>scf.server.telnet.listenPort</name>
+<value>29000</value>
+</property>
+ 
+ <!-- 
+<property>
+<name>scf.init</name> -->
+<!--定时的全路径 --><!--
+<value>cg.zz.mimi.utils.InitUtils</value>
+</property> -->
+ 
+</configuration>

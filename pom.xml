@@ -1,0 +1,237 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>cg.zz</groupId>
+	<artifactId>scf</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>${project.artifactId}</name>
+
+	<description>The parent project of scf</description>
+	<url>http://www.58.com/</url>
+	<inceptionYear>2019</inceptionYear>
+
+	<modules>
+		<module>scf-client</module>
+		<module>scf-protocol</module>
+		<module>scf-serializer</module>
+		<module>scf-server</module>
+		<module>scf-utility</module>
+		<module>scf-client-demo</module>
+		<module>scf-server-demo</module>
+	</modules>
+
+	<properties>
+		<commons_logging_version>1.2</commons_logging_version>
+		<antlr_version>2.7.4</antlr_version>
+		<javassist_version>3.12.0.GA</javassist_version>
+		<netty_version>3.2.9.Final</netty_version>
+		<fastjson_version>1.2.61</fastjson_version>
+		
+		<!-- log libs -->
+		<log4j_version>1.2.17</log4j_version>
+		<slf4j_log4j_version>1.6.6</slf4j_log4j_version>
+		
+		<!-- Test libs -->
+		<junit_version>4.12</junit_version>
+
+		<!-- Build args -->
+		<argline>-server -Xms64m -Xmx64m -XX:PermSize=64m -XX:MaxPermSize=64m</argline>
+		<skip_maven_deploy>false</skip_maven_deploy>
+		<skip_maven_test>true</skip_maven_test>
+		<project.build.sourceEncoding>${file_encoding}</project.build.sourceEncoding>
+		<!-- for maven compiler plugin -->
+		<maven_compiler_plugin_version>2.3.2</maven_compiler_plugin_version>
+		<java_source_version>1.8</java_source_version>
+		<java_target_version>1.8</java_target_version>
+		<file_encoding>UTF-8</file_encoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>${commons_logging_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>${javassist_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.netty</groupId>
+				<artifactId>netty</artifactId>
+				<version>${netty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>antlr</groupId>
+				<artifactId>antlrall</artifactId>
+				<version>${antlr_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba</groupId>
+				<artifactId>fastjson</artifactId>
+				<version>${fastjson_version}</version>
+			</dependency>
+			<!-- log -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${slf4j_log4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${log4j_version}</version>
+			</dependency>
+		  	<!-- Tools Test -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit_version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>true</addMavenDescriptor>
+						<index>true</index>
+						<manifest>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>${skip_maven_test}</skip>
+					<useSystemClassLoader>true</useSystemClassLoader>
+					<forkMode>once</forkMode>
+					<argLine>${argline}</argLine>
+					<systemProperties>
+						<!-- common shared -->
+						<property>
+							<name>transporter</name>
+							<value>${transporter}</value>
+						</property>
+						<property>
+							<name>serialization</name>
+							<value>${serialization}</value>
+						</property>
+						<!-- server side -->
+						<property>
+							<name>port</name>
+							<value>${port}</value>
+						</property>
+						<property>
+							<name>threadpool</name>
+							<value>${threadpool}</value>
+						</property>
+						<property>
+							<name>threads</name>
+							<value>${threads}</value>
+						</property>
+						<property>
+							<name>iothreads</name>
+							<value>${iothreads}</value>
+						</property>
+						<!-- client side -->
+						<property>
+							<name>server</name>
+							<value>${server}</value>
+						</property>
+						<property>
+							<name>timeout</name>
+							<value>${timeout}</value>
+						</property>
+						<property>
+							<name>length</name>
+							<value>${length}</value>
+						</property>
+						<property>
+							<name>connections</name>
+							<value>${connections}</value>
+						</property>
+						<property>
+							<name>base</name>
+							<value>${base}</value>
+						</property>
+						<property>
+							<name>concurrent</name>
+							<value>${concurrent}</value>
+						</property>
+						<property>
+							<name>runs</name>
+							<value>${runs}</value>
+						</property>
+						<property>
+							<name>onerror</name>
+							<value>${onerror}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.1</version>
+				<configuration>
+					<source>${java_source_version}</source>
+					<target>${java_target_version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>${skip_maven_deploy}</skip>
+				</configuration>
+			</plugin>
+			<!-- mvn -N versions:update-child-modules �����޸İ汾�� -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<generateBackupPoms>false</generateBackupPoms>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<developers>
+		<developer>
+			<name>ChenGang</name>
+			<id>ChenGang</id>
+			<email>172577882@qq.com</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+	</developers>
+
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<file>
+					<missing>.project</missing>
+				</file>
+			</activation>
+		</profile>
+	</profiles>
+</project>

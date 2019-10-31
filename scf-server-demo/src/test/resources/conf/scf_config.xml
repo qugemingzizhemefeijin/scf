@@ -1,0 +1,243 @@
+<?xml version="1.0"?>
+<configuration>
+
+<!-- +++++++++++++++ global config ++++++++++++++++ -->
+
+<!-- service name -->
+<property>
+<name>scf.service.name</name>
+<value></value>
+</property>
+
+<!-- service encoding -->
+<property>
+<name>scf.encoding</name>
+<value>utf-8</value>
+</property>
+
+<!-- hotdeploy? -->
+<property>
+<name>scf.hotdeploy</name>
+<value>false</value>
+</property>
+
+<!-- global reqeust filter -->
+<property>
+<name>scf.filter.global.request</name>
+<value>cg.zz.scf.server.filter.ProtocolParseFilter,cg.zz.scf.server.filter.HandclaspFilter,cg.zz.scf.server.filter.ExecuteMethodFilter</value>
+</property>
+
+<!-- global response filter -->
+<property>
+<name>scf.filter.global.response</name>
+<value>cg.zz.scf.server.filter.ProtocolCreateFilter,cg.zz.scf.server.filter.ExecuteTimeFilter</value>
+</property>
+
+<!-- connection filter-->
+<property>
+<name>scf.filter.connection</name>
+<value>cg.zz.scf.server.filter.IPFilter</value>
+</property>
+
+<!-- allow ip list -->
+<property>
+<name>scf.iptable.allow.iplist</name>
+<value></value>
+</property>
+
+<!-- forbid ip list -->
+<property>
+<name>scf.iptable.forbid.iplist</name>
+<value></value>
+</property>
+
+<!-- init beans -->
+<property>
+<name>scf.init</name>
+<value>cg.zz.scf.server.contract.context.SerializerClassInit</value>
+</property>
+
+<!-- udp log server ip -->
+<property>
+<name>scf.log.udpserver.ip</name>
+<value>www.dns.org</value>
+</property>
+
+<!-- udp log server port -->
+<property>
+<name>scf.log.udpserver.port</name>
+<value>8888</value>
+</property>
+
+<!-- udp log execute time limit(ms), if(execTime > limit) then log -->
+<property>
+<name>scf.log.exectime.limit</name>
+<value>200</value>
+</property>
+
+
+
+<!-- proxy invoker-->
+<property>
+<name>scf.proxy.invoker.implement</name>
+<value>cg.zz.scf.server.core.proxy.AsyncInvokerHandle</value>
+</property>
+
+<!-- async worker count-->
+<property>
+<name>scf.async.worker.count</name>
+<value>128</value>
+</property>
+
+<!-- server list-->
+<property>
+<name>scf.servers</name>
+<value>scf.server.tcp,scf.server.http,scf.server.telnet</value>
+</property>
+
+<!-- +++++++++++++++ socket server config ++++++++++++++++ -->
+
+<!-- socket server is enable -->
+<property>
+<name>scf.server.tcp.enable</name>
+<value>true</value>
+</property>
+
+<!-- socket server listent port -->
+<property>
+<name>scf.server.tcp.listenPort</name>
+<value>19090</value>
+</property>
+
+<!-- socket server listent ip -->
+<property>
+<name>scf.server.tcp.listenIP</name>
+<value>0.0.0.0</value>
+</property>
+
+<!-- socket server receive buffer size:1024 * 64 -->
+<property>
+<name>scf.server.tcp.receiveBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- socket server send buffer size:1024 * 64 -->
+<property>
+<name>scf.server.tcp.sendBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- socket server frame max length:1024 * 512 -->
+<property>
+<name>scf.server.tcp.frameMaxLength</name>
+<value>524288</value>
+</property>
+
+<!-- socket server worder thread count netty-->
+<property>
+<name>scf.server.tcp.workerCount</name>
+<value>32</value>
+</property>
+
+<!-- socket server task timeout 3000ms-->
+<property>
+<name>scf.server.tcp.task.timeout</name>
+<value>3000</value>
+</property>
+
+<!-- socket server implement class -->
+<property>
+<name>scf.server.tcp.implement</name>
+<value>cg.zz.scf.server.core.communication.tcp.SocketServer</value>
+</property>
+
+<!-- +++++++++++++++ http server config ++++++++++++++++ -->
+
+<!-- http server is enable -->
+<property>
+<name>scf.server.http.enable</name>
+<value>false</value>
+</property>
+
+<!-- http server listent port -->
+<property>
+<name>scf.server.http.listenPort</name>
+<value>8080</value>
+</property>
+
+<!-- http server listent ip -->
+<property>
+<name>scf.server.http.listenIP</name>
+<value>0.0.0.0</value>
+</property>
+
+<!-- http server receive buffer size:1024 * 64 -->
+<property>
+<name>scf.server.http.receiveBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- http server send buffer size:1024 * 64 -->
+<property>
+<name>scf.server.http.sendBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- http server frame max length:1024 * 512 -->
+<property>
+<name>scf.server.http.frameMaxLength</name>
+<value>524288</value>
+</property>
+
+<!-- http server worder thread count -->
+<property>
+<name>scf.server.http.workerCount</name>
+<value>32</value>
+</property>
+
+<!-- http server implement class -->
+<property>
+<name>scf.server.http.implement</name>
+<value>cg.zz.scf.server.core.communication.http.HttpServer</value>
+</property>
+
+
+<!-- +++++++++++++++ telnet server config ++++++++++++++++ -->
+
+<!-- telnet server is enable -->
+<property>
+<name>scf.server.telnet.enable</name>
+<value>true</value>
+</property>
+
+<!-- telnet server receive buffer size:1024 * 64 -->
+<property>
+<name>scf.server.telnet.receiveBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- telnet server send buffer size:1024 * 64 -->
+<property>
+<name>scf.server.telnet.sendBufferSize</name>
+<value>65536</value>
+</property>
+
+<!-- telnet server frame max length:1024 * 512 -->
+<property>
+<name>scf.server.telnet.frameMaxLength</name>
+<value>524288</value>
+</property>
+
+<!-- telnet server worder thread count -->
+<property>
+<name>scf.server.telnet.workerCount</name>
+<value>1</value>
+</property>
+
+<!-- telnet server implement class -->
+<property>
+<name>scf.server.telnet.implement</name>
+<value>cg.zz.scf.server.core.communication.telnet.TelnetServer</value>
+</property>
+
+</configuration>
