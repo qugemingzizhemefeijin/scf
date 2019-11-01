@@ -33,21 +33,30 @@ public class ServerProfile {
 	private int deadTimeout;
 	
 	/**
-	 * 比重率
+	 * 服务权重，如果没有配置，则默认为1
 	 */
 	private float weithtRate;
 	
+	/**
+	 * 解析<add name="enterprise" host="127.0.0.1" port="19000" maxCurrentUser="100" />XML节点并构造ServerProfile对象
+	 * @param node - Node
+	 */
 	public ServerProfile(Node node){
 		NamedNodeMap attributes = node.getAttributes();
+		//服务器名称[此版本名字根本没啥用]
 		this.name = attributes.getNamedItem("name").getNodeValue();
+		//IP地址
 		this.host = attributes.getNamedItem("host").getNodeValue();
+		//端口
 		this.port = Integer.parseInt(attributes.getNamedItem("port").getNodeValue());
+		//权重
 		Node atribute = attributes.getNamedItem("weithtRate");
 		if (atribute != null)
 			this.weithtRate = Float.parseFloat(atribute.getNodeValue().toString());
 		else {
 			this.weithtRate = 1.0F;
 		}
+		//服务器挂后心跳检测间隔时间，没有配置则为60秒。这个deadTimeout是配置在Server节点上的。
 		atribute = node.getParentNode().getAttributes().getNamedItem("deadTimeout");
 		if (atribute != null) {
 			//设置最小值为30s

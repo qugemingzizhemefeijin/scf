@@ -62,11 +62,23 @@ public class Server {
 	private float weightRage;
 	
 	/**
-	 * 当前用户数
+	 * 当前正在请求的数量
 	 */
 	private int currUserCount;
+	
+	/**
+	 * 当前服务器状态
+	 */
 	private ServerState state;
+	
+	/**
+	 * 服务器的连接池对象
+	 */
 	private ScoketPool scoketpool;
+	
+	/**
+	 * 是否正在测试中
+	 */
 	private boolean testing = false;
 	
 	/**
@@ -74,6 +86,10 @@ public class Server {
 	 */
 	private final ScheduledExecutorService scheduler;
 	
+	/**
+	 * 创建Server对象，在Dispatcher对象初始化的时候会被调用
+	 * @param config - 服务配置
+	 */
 	protected Server(ServerProfile config) {
 		this.name = config.getName();
 		this.address = config.getHost();
@@ -277,7 +293,7 @@ public class Server {
 	}
 	
 	/**
-	 * 设置当前重启服务
+	 * 设置当前服务状态为重启
 	 * @throws Exception
 	 * @throws Throwable
 	 */
@@ -335,7 +351,7 @@ public class Server {
 	 * @return boolean
 	 */
 	private boolean test() {
-		if (this.testing) {
+		if (this.testing) {//正在测试中，则直接返回true
 			return true;
 		}
 		this.testing = true;

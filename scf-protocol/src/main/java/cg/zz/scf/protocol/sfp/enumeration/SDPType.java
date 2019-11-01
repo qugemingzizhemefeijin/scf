@@ -14,14 +14,38 @@ import cg.zz.scf.protocol.sdp.ResponseProtocol;
 public enum SDPType {
 	
 	/**
-	 * Reset:服务重启协议 ;Handclasp:权限认证协议
+	 * 请求响应
 	 */
 	Response(1),
+	
+	/**
+	 * 请求
+	 */
 	Request(2),
+	
+	/**
+	 * 异常
+	 */
 	Exception(3),
+	
+	/**
+	 * ????
+	 */
 	Config(4),
+	
+	/**
+	 * Handclasp:权限认证协议
+	 */
 	Handclasp(5),
+	
+	/**
+	 * 服务重启协议
+	 */
 	Reset(6),
+	
+	/**
+	 * ???
+	 */
 	StringKey(7);
 	
 	private final int num;

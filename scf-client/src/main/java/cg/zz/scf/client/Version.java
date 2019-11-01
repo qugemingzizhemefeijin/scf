@@ -7,6 +7,6 @@ package cg.zz.scf.client;
  */
 public class Version {
 	
-	public static final String ID = "SCF Client V1.0.0:";
+	public static final String ID = "SCF Client V1.6.6:";
 
 }

@@ -23,12 +23,12 @@ public class SCFConst {
 	public static final int DEFAULT_MAX_CURRENT_USER_COUNT = 2000;
 	
 	/**
-	 * 1m
+	 * Socket的发送缓存,1MB
 	 */
 	public static final int DEFAULT_MAX_PAKAGE_SIZE = 1024 * 1024;
 	
 	/**
-	 * 10kb
+	 * Socket的接收缓冲,10KB
 	 */
 	public static final int DEFAULT_BUFFER_SIZE = 10 * 1024;
 	

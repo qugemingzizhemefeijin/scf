@@ -7,7 +7,7 @@ import cg.zz.scf.serializer.component.annotation.SCFMember;
 import cg.zz.scf.serializer.component.annotation.SCFSerializable;
 
 /**
- * request协议
+ * request协议对象
  * @author chengang
  *
  */
@@ -15,7 +15,7 @@ import cg.zz.scf.serializer.component.annotation.SCFSerializable;
 public class RequestProtocol {
 	
 	/**
-	 * 命名空间
+	 * 接口名
 	 */
 	@SCFMember(sortId=1)
 	private String lookup;
@@ -39,6 +39,12 @@ public class RequestProtocol {
 		
 	}
 	
+	/**
+	 * 创建Request协议对象
+	 * @param lookup - 接口名
+	 * @param methodName - 方法名称
+	 * @param paraKVList - 参数列表
+	 */
 	public RequestProtocol(String lookup, String methodName, List<KeyValuePair> paraKVList) {
 		this.lookup = lookup;
 		this.methodName = methodName;

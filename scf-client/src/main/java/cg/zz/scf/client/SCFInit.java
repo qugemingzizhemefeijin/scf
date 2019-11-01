@@ -15,7 +15,7 @@ public class SCFInit {
 	/**
 	 * 配置文件路径
 	 */
-	protected static String DEFAULT_CONFIG_PATH = null;
+	protected static String DEFAULT_CONFIG_PATH;
 	
 	private static ILog logger = LogFactory.getLogger(SCFInit.class);
 	

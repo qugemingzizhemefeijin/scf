@@ -67,7 +67,7 @@ public class SocketPoolProfile {
 	private boolean _protected;
 	
 	/**
-	 * 重新连接的超时时间
+	 * 请求重试的超时时间
 	 */
 	private int reconnectTime = 0;
 	
