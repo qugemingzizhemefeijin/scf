@@ -6,7 +6,18 @@ import cg.zz.scf.client.SCFConst;
 import cg.zz.scf.client.utility.helper.TimeSpanHelper;
 
 /**
- * socket连接池配置信息
+ * socket连接池配置信息<br/>
+ * <br/>
+ * bufferSize:网络传输流缓存大小<br/>
+ * minPoolSize:连接池中最小连接数量<br/>
+ * maxPoolSize:连接池中最大连接数量<br/>
+ * nagle:是否启用Nagle算法<br/>
+ * autoShrink:是否启动连接自动回收<br/>
+ * sendTimeout:发送超时<br/>
+ * receiveTimeout:接收超时<br/>
+ * waitTimeout:当连接池中没有连接时需要等待释放连接的时间<br/>
+ * 
+ * &lt;SocketPool bufferSize="4096" minPoolSize="3" maxPoolSize="100" nagle="true" autoShrink="00:00:20" sendTimeout="00:00:05" receiveTimeout="00:00:10" waitTimeout="00:00:03" /&gt;
  *
  */
 public class SocketPoolProfile {
@@ -37,12 +48,12 @@ public class SocketPoolProfile {
 	private int waitTimeout;
 	
 	/**
-	 * 
+	 * 是否启用Nagle算法
 	 */
 	private boolean nagle;
 	
 	/**
-	 * 
+	 * 连接自动回收的时间
 	 */
 	private int shrinkInterval;
 	
@@ -62,7 +73,7 @@ public class SocketPoolProfile {
 	private int maxPakageSize;
 	
 	/**
-	 * 
+	 * 当前服务是受保护的，默认true。如果为true，socket读取数据超时时间是动态变化的（负载越大超时时间越小），否则是一个恒定值。
 	 */
 	private boolean _protected;
 	

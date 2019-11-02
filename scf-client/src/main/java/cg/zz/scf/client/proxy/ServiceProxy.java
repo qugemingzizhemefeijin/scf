@@ -352,7 +352,7 @@ public class ServiceProxy {
 	}
 	
 	/**
-	 * 创建协议
+	 * 创建DES密钥交换协议
 	 * @param hp - HandclaspProtocol
 	 * @return Protocol
 	 * @throws Exception
@@ -362,7 +362,7 @@ public class ServiceProxy {
 	}
 	
 	/**
-	 * 创建一个认证协议
+	 * 创建一个字符密钥协议
 	 * @param ap - 名称
 	 * @return Protocol
 	 * @throws Exception

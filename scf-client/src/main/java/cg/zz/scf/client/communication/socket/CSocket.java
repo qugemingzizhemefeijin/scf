@@ -6,7 +6,9 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import cg.zz.scf.client.SCFConst;
 import cg.zz.scf.client.configuration.commmunication.SocketPoolProfile;
@@ -22,65 +24,156 @@ import cg.zz.scf.protocol.utility.ByteConverter;
 import cg.zz.scf.protocol.utility.ProtocolConst;
 
 /**
- * 客户端连接
+ * RPC通信连接（这里用的原生的Java Socket，估计是为了防止客户端过度依赖比如netty框架）
  *
  */
 public class CSocket {
 	
 	private static final ILog logger = LogFactory.getLogger(CSocket.class);
 	
-	private byte[] DESKey;// DES密钥
-	private boolean rights;// 是否启用认证
+	/**
+	 * DES密钥
+	 */
+	private byte[] DESKey;
+	
+	/**
+	 * 是否需要DES加解密
+	 */
+	private boolean rights;
+	
+	/**
+	 * 真正的socket对象
+	 */
 	private Socket socket;
+	
+	/**
+	 * 此对象所属的连接池对象
+	 */
 	private ScoketPool pool;
+	
+	/**
+	 * SocketChannel
+	 */
 	private SocketChannel channel;
+	
+	/**
+	 * 数据的读写缓冲
+	 */
 	private ByteBuffer receiveBuffer, sendBuffer;
+	
+	/**
+	 * 连接池配置属性
+	 */
 	private SocketPoolProfile socketConfig;
+	
+	/**
+	 * 是否当前对象在连接池中
+	 */
 	private boolean _inPool = false;
+	
+	/**
+	 * 是否正在连接中
+	 */
 	private boolean _connecting = false;
+	
+	/**
+	 * Socket IO线程数据接收器
+	 */
 	private DataReceiver dataReceiver = null;
+	
+	/**
+	 * 是否等待销毁，如果连接池缩小，此值将未true，并随后在Worker调用CSocket的frameHandle方法中进行释放
+	 */
 	private boolean waitDestroy = false;
+	
+	/**
+	 * 发送消息锁
+	 */
 	private final Object sendLockHelper = new Object();
+	
+	/**
+	 * 接收消息锁
+	 */
 	private final Object receiveLockHelper = new Object();
+	
+	/**
+	 * 接收消息字节缓冲流
+	 */
 	private CByteArrayOutputStream receiveData = new CByteArrayOutputStream();
-	private ConcurrentHashMap<Integer, WindowData> WaitWindows = new ConcurrentHashMap<Integer, WindowData>();
-	private static NIOHandler handler = null;
 	
+	/**
+	 * 每个socket都维护了sessionID和WindowData的映射关系。在接收到消息的时候，从这里可以解锁休眠线程或者执行回调函数
+	 */
+	private Map<Integer, WindowData> WaitWindows = new ConcurrentHashMap<>();
+	
+	/**
+	 * 异步消息发送处理器
+	 */
+	private static final NIOHandler ASYNC_MESSAGE_HANDLER = NIOHandler.getInstance();
+	
+	/**
+	 * 用于匹配消息结束标志的计数值，如果index=ProtocolConst.P_END_TAG.length，则代表本次消息已经处理接收完毕。。用于解决半包，粘包问题
+	 */
 	private volatile int index = 0;
-	private volatile boolean handling = false;//是否正被锁着
 	
+	/**
+	 * 是否正被处理接收到的消息
+	 */
+	private volatile boolean handling = false;
+	
+	/**
+	 * 创建Socket连接
+	 * @param endpoint - 连接的服务器地址
+	 * @param _pool - 所属的连接池对象
+	 * @param config - 连接池配置
+	 * @throws Exception
+	 */
 	protected CSocket(InetSocketAddress endpoint, ScoketPool _pool, SocketPoolProfile config) throws Exception {
 		this.socketConfig = config;
 		this.pool = _pool;
+		//新建SocketChannel对象
 		this.channel = SocketChannel.open();
+		//设置为非阻塞模式
 		this.channel.configureBlocking(false);
+		//设置socket的发送缓存区大小
 		this.channel.socket().setSendBufferSize(config.getSendBufferSize());
+		//设置socket的接收缓存区大小
 		this.channel.socket().setReceiveBufferSize(config.getRecvBufferSize());
+		//数据读缓冲
 		this.receiveBuffer = ByteBuffer.allocate(config.getBufferSize());
+		//数据写缓冲
 		this.sendBuffer = ByteBuffer.allocate(config.getMaxPakageSize());
+		//连接到服务器
 		this.channel.connect(endpoint);
 		
+		//判断socket是否连接超时
 		long begin = System.currentTimeMillis();
 		while (true) {
 			if (System.currentTimeMillis() - begin > SCFConst.SOCKET_CONNECT_TIMEOUT) {
 				this.channel.close();
-			        throw new ConnectTimeOutException("connect to " + endpoint + " timeout："+SCFConst.SOCKET_CONNECT_TIMEOUT+"ms");
+			    throw new ConnectTimeOutException("connect to " + endpoint + " timeout："+SCFConst.SOCKET_CONNECT_TIMEOUT+"ms");
 			}
+			//isConnected方法只有在状态为ST_CONNECTED = 2的时候，才会返回true，否则返回false
+			//finishConnect如果状态=2则返回true，否则状态不是ST_PENDING = 1的时候返回false，则会抛出异常
 			this.channel.finishConnect();
-			if (this.channel.isConnected()) break;
-			
+			if (this.channel.isConnected()) {
+				break;
+			}
 			try {
-				Thread.sleep(50L);
+				TimeUnit.MILLISECONDS.sleep(50);
 			} catch (InterruptedException e) {
 				logger.error(e);
 			}
 		}
 		
+		//获取Socket对象
 		this.socket = this.channel.socket();
+		//设置当前状态为已连接
 		this._connecting = true;
+		//Socket IO线程数据接收器
 		this.dataReceiver = DataReceiver.instance();
+		//将其注册到IO线程接收器中
 		this.dataReceiver.RegSocketChannel(this);
-		handler = NIOHandler.getInstance();
 		
 		logger.info("MaxPakageSize:" + config.getMaxPakageSize());
 		logger.info("SendBufferSize:" + config.getSendBufferSize());
@@ -88,42 +181,17 @@ public class CSocket {
 		logger.info("create a new connection :" + toString());
 	}
 	
+	/**
+	 * 
+	 * 创建Socket连接
+	 * @param addr - 服务器IP地址
+	 * @param port - 服务器端口
+	 * @param _pool - 所属的连接池对象
+	 * @param config - 连接池配置
+	 * @throws Exception
+	 */
 	protected CSocket(String addr, int port, ScoketPool _pool, SocketPoolProfile config) throws Exception {
-		this.socketConfig = config;
-		this.pool = _pool;
-		this.channel = SocketChannel.open();
-		this.channel.configureBlocking(false);
-		this.channel.socket().setSendBufferSize(config.getSendBufferSize());
-		this.channel.socket().setReceiveBufferSize(config.getRecvBufferSize());
-		this.receiveBuffer = ByteBuffer.allocate(config.getBufferSize());
-		this.sendBuffer = ByteBuffer.allocate(config.getMaxPakageSize());
-		this.channel.connect(new InetSocketAddress(addr, port));
-		
-		long begin = System.currentTimeMillis();
-		while (true) {
-			if (System.currentTimeMillis() - begin > SCFConst.SOCKET_CONNECT_TIMEOUT) {
-				this.channel.close();
-				throw new ConnectTimeOutException("connect to " + addr + ":" + port + " timeout："+SCFConst.SOCKET_CONNECT_TIMEOUT+"ms");
-			}
-			this.channel.finishConnect();
-			if (this.channel.isConnected()) break;
-			try {
-				Thread.sleep(50L);
-			} catch (InterruptedException e) {
-				logger.error(e);
-			}
-		}
-		
-		this.socket = this.channel.socket();
-		this._connecting = true;
-		this.dataReceiver = DataReceiver.instance();
-		this.dataReceiver.RegSocketChannel(this);
-		handler = NIOHandler.getInstance();
-
-		logger.info("MaxPakageSize:" + config.getMaxPakageSize());
-		logger.info("SendBufferSize:" + config.getSendBufferSize());
-		logger.info("RecvBufferSize:" + config.getRecvBufferSize());
-		logger.info("create a new connection :" + toString());
+		this(new InetSocketAddress(addr, port) , _pool , config);
 	}
 	
 	/**
@@ -142,11 +210,11 @@ public class CSocket {
 				}
 				
 				int count = 0;
-			        this.sendBuffer.clear();
-			        this.sendBuffer.put(ProtocolConst.P_START_TAG);
-			        this.sendBuffer.put(data);
-			        this.sendBuffer.put(ProtocolConst.P_END_TAG);
-			        this.sendBuffer.flip();
+		        this.sendBuffer.clear();
+		        this.sendBuffer.put(ProtocolConst.P_START_TAG);
+		        this.sendBuffer.put(data);
+		        this.sendBuffer.put(ProtocolConst.P_END_TAG);
+		        this.sendBuffer.flip();
 			        
 				int retryCount = 0;
 				while (this.sendBuffer.hasRemaining()) {
@@ -168,7 +236,7 @@ public class CSocket {
 	}
 	
 	/**
-	 * 接收数据
+	 * 接收同步数据
 	 * @param sessionId - int
 	 * @param queueLen - 
 	 * @return byte[]
@@ -183,12 +251,12 @@ public class CSocket {
 		}
 		AutoResetEvent event = wd.getEvent();
 		int timeout = getReadTimeout(this.socketConfig.getReceiveTimeout(), queueLen);
-		timeout = 1000000;
 		if (!event.waitOne(timeout)) {
 			throw new TimeoutException("ServiceName:[" + getServiceName() + "],ServiceIP:[" + getServiceIP() + "],Receive data timeout or error!timeout:" + timeout + "ms,queue length:" + queueLen);
 		}
 		
 		byte[] data = wd.getData();
+		//从data第二个位置读取4字节的消息长度，如果读取到的数值跟data.length一致，则认为消息可靠
 		int offset = SFPStruct.Version;
 		int len = ByteConverter.bytesToIntLittleEndian(data, offset);
 		if (len != data.length) {
@@ -276,8 +344,8 @@ public class CSocket {
 	}
 	
 	/**
-	 * 注册一个sessionId
-	 * @param sessionId
+	 * 向WaitWindows中注册一个sessionId
+	 * @param sessionId - int
 	 */
 	public void registerRec(int sessionId) {
 		AutoResetEvent event = new AutoResetEvent();
@@ -286,7 +354,7 @@ public class CSocket {
 	}
 	
 	/**
-	 * 注册一个sessionId
+	 * 向WaitWindows中注册一个sessionId
 	 * @param sessionId - int
 	 * @param wd - WindowData
 	 */
@@ -295,7 +363,7 @@ public class CSocket {
 	}
 	
 	/**
-	 * 注销一个sessionId
+	 * 从WaitWindows中注销一个sessionId
 	 * @param sessionId
 	 */
 	public void unregisterRec(int sessionId) {
@@ -303,7 +371,7 @@ public class CSocket {
 	}
 	
 	/**
-	 * 判断是否已经有了sessionId了
+	 * 判断WaitWindows中是否已经有指定的sessionId
 	 * @param sessionId - int
 	 * @return boolean
 	 */
@@ -361,8 +429,12 @@ public class CSocket {
 		this._connecting = false;
 	}
 
+	/**
+	 * 将本次应该发送的消息发送到异步队列中发送
+	 * @param wd - WindowData
+	 */
 	public void offerAsyncWrite(WindowData wd) {
-		handler.offerWriteData(wd);
+		ASYNC_MESSAGE_HANDLER.offerWriteData(wd);
 	}
 	
 	public int getTimeOut(int queueLen) {
@@ -404,6 +476,7 @@ public class CSocket {
 		return result;
 	}
 	
+	@Override
 	protected void finalize() throws Throwable {
 		try {
 			if (this._connecting || (this.channel != null && this.channel.isOpen()))
@@ -436,13 +509,16 @@ public class CSocket {
 	}
 
 	/**
-	 * 该链接是否是空闲状态
+	 * 该连接是否是空闲状态
 	 * @return boolean
 	 */
 	protected boolean isIdle() {
 		return this.WaitWindows.size() <= 0;
 	}
 
+	/**
+	 * 设置连接等待消息，最终在frameHandle方法中消息，调用在Worker对象中
+	 */
 	protected void waitDestroy() {
 		this.waitDestroy = true;
 	}

@@ -18,6 +18,8 @@ public class DataReceiver {
 	
 	private DataReceiver() throws IOException {
 		this.worker = new Worker();
+		
+		//启动一个IO线程，负责写入和接收消息
 		Thread thread = new Thread(this.worker);
 		thread.setName("DataReceiver-thread");
 		thread.setDaemon(true);

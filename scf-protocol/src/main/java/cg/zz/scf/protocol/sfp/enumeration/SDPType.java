@@ -34,7 +34,7 @@ public enum SDPType {
 	Config(4),
 	
 	/**
-	 * Handclasp:权限认证协议
+	 * Handclasp:DES密钥交换消息
 	 */
 	Handclasp(5),
 	
@@ -44,7 +44,7 @@ public enum SDPType {
 	Reset(6),
 	
 	/**
-	 * ???
+	 * 看样子是交换加密key，但是此功能在服务器未实现
 	 */
 	StringKey(7);
 	

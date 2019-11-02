@@ -72,8 +72,7 @@ public class CQueueL extends LinkedBlockingQueue<CSocket> {
 	 * @return CSocket
 	 */
 	public CSocket dequeue() {
-		CSocket csocket = (CSocket) poll();
-		return csocket;
+		return poll();
 	}
 	
 	/**
@@ -83,8 +82,7 @@ public class CQueueL extends LinkedBlockingQueue<CSocket> {
 	 * @throws InterruptedException
 	 */
 	public CSocket dequeue(long time) throws InterruptedException {
-		CSocket csocket = (CSocket) poll(time, TimeUnit.MILLISECONDS);
-		return csocket;
+		return poll(time, TimeUnit.MILLISECONDS);
 	}
 	
 	/**
@@ -106,7 +104,7 @@ public class CQueueL extends LinkedBlockingQueue<CSocket> {
 	}
 	
 	/**
-	 * 获得当前连接的数量
+	 * 获得当前所有连接的数量（包括正在被使用着的）
 	 * @return int
 	 */
 	public int getTotal() {
@@ -122,7 +120,7 @@ public class CQueueL extends LinkedBlockingQueue<CSocket> {
 	}
 	
 	/**
-	 * 检查是否还有空闲的元素
+	 * 检查当前连接池可被回收的数量，如果可被回收的数量>0，则返回true。否则更新可被回收的数量，并刷新检查时间。
 	 * @return boolean
 	 */
 	public boolean shrink() {
@@ -133,7 +131,7 @@ public class CQueueL extends LinkedBlockingQueue<CSocket> {
 			}
 			if (System.currentTimeMillis() - this.lastCheckTime > this._duration) {
 				this.lastCheckTime = System.currentTimeMillis();
-				boolean b = (this.freeCount > 0) && (getTotal() > this._minConn);
+				boolean b = (this.freeCount > 0 && getTotal() > this._minConn);
 				if (b) {
 					this.shrinkCount = Math.min(getTotal() - this._minConn, this.freeCount);
 					if (this.shrinkCount < 0) {

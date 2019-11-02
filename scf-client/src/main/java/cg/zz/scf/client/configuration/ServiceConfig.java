@@ -20,55 +20,47 @@ import cg.zz.scf.client.configuration.secure.ApproveProfile;
 import cg.zz.scf.client.configuration.secure.KeyProfile;
 import cg.zz.scf.client.utility.helper.XMLHelper;
 
+/**
+ * 服务配置信息
+ * @author chengang
+ *
+ */
 public class ServiceConfig {
 	
+	/**
+	 * 服务名称
+	 */
 	private String servicename;
+	
+	/**
+	 * 服务ID
+	 */
 	private int serviceid;
+	
+	/**
+	 * 连接池配置信息
+	 */
 	private SocketPoolProfile SocketPool;
+	
+	/**
+	 * 协议配置信息
+	 */
 	private ProtocolProfile protocol;
+	
+	/**
+	 * 服务包含的服务端地址信息
+	 */
 	private List<ServerProfile> servers;
+	
+	/**
+	 * DES公私钥配置
+	 */
 	private KeyProfile SecureKey;
 	
 	/**
-	 * 授权配置文件
+	 * 字符密码配置，校验&lt;Approve&gt;中&lt;keyinfo&gt;的&lt;key&gt;字段中info属性跟服务端是否一致
 	 */
 	private ApproveProfile approveKey;
-	
-	public KeyProfile getSecureKey() {
-		return this.SecureKey;
-	}
-
-	public void setSecureKey(KeyProfile secureKey) {
-		this.SecureKey = secureKey;
-	}
-
-	public ApproveProfile getApproveKey() {
-		return this.approveKey;
-	}
-
-	public void setApproveKey(ApproveProfile approveKey) {
-		this.approveKey = approveKey;
-	}
-
-	public SocketPoolProfile getSocketPool() {
-		return this.SocketPool;
-	}
-
-	public ProtocolProfile getProtocol() {
-		return this.protocol;
-	}
-
-	public List<ServerProfile> getServers() {
-		return this.servers;
-	}
-
-	public int getServiceid() {
-		return this.serviceid;
-	}
-
-	public String getServicename() {
-		return this.servicename;
-	}
 	
 	public static ServiceConfig GetConfig(String serviceName) throws Exception {
 		File f = new File(SCFConst.CONFIG_PATH);
@@ -85,6 +77,7 @@ public class ServiceConfig {
 		}
 		
 		ServiceConfig config = new ServiceConfig();
+		//服务名称和ID
 		config.servicename = serviceNode.getAttributes().getNamedItem("name").getNodeValue();
 		Node idNode = serviceNode.getAttributes().getNamedItem("id");
 		if (idNode == null) {
@@ -104,12 +97,15 @@ public class ServiceConfig {
 		}
 		config.protocol = new ProtocolProfile(xnProtocol);
 		
+		//DES密钥
 		Node xnKey = (Node) xpath.evaluate("Secure/Key", serviceNode, XPathConstants.NODE);
 		config.SecureKey = new KeyProfile(xnKey);
 
+		//字符密钥
 		Node apKey = (Node) xpath.evaluate("Approve/key", serviceNode, XPathConstants.NODE);
 		config.approveKey = new ApproveProfile(apKey);
 
+		//服务地址信息
 		NodeList xnServers = (NodeList) xpath.evaluate("Loadbalance/Server/add", serviceNode,XPathConstants.NODESET);
 		if ((xnServers == null) || (xnServers.getLength() == 0)) {
 			printExceprion(3, serviceName);
@@ -185,17 +181,53 @@ public class ServiceConfig {
 	 */
 	private static void printExceprion(int i, String serviceName) throws Exception {
 		switch (i) {
-		case 0:
-			throw new Exception("scf.config中没有发现" + serviceName + "服务节点!");
-		case 1:
-			throw new Exception("scf.config服务节点" + serviceName + "没有发现Commmunication/SocketPool配置!");
-		case 2:
-			throw new Exception("scf.config服务节点" + serviceName + "没有发现Commmunication/Protocol配置!");
-		case 3:
-			throw new Exception("scf.config服务节点" + serviceName + "没有发现Loadbalance/Server/add配置!");
-		case 4:
-			throw new Exception("scf.config服务节点" + serviceName + "没有发现Service/id配置!");
+			case 0:
+				throw new Exception("scf.config中没有发现" + serviceName + "服务节点!");
+			case 1:
+				throw new Exception("scf.config服务节点" + serviceName + "没有发现Commmunication/SocketPool配置!");
+			case 2:
+				throw new Exception("scf.config服务节点" + serviceName + "没有发现Commmunication/Protocol配置!");
+			case 3:
+				throw new Exception("scf.config服务节点" + serviceName + "没有发现Loadbalance/Server/add配置!");
+			case 4:
+				throw new Exception("scf.config服务节点" + serviceName + "没有发现Service/id配置!");
 		}
+	}
+	
+	public KeyProfile getSecureKey() {
+		return this.SecureKey;
+	}
+
+	public void setSecureKey(KeyProfile secureKey) {
+		this.SecureKey = secureKey;
+	}
+
+	public ApproveProfile getApproveKey() {
+		return this.approveKey;
+	}
+
+	public void setApproveKey(ApproveProfile approveKey) {
+		this.approveKey = approveKey;
+	}
+
+	public SocketPoolProfile getSocketPool() {
+		return this.SocketPool;
+	}
+
+	public ProtocolProfile getProtocol() {
+		return this.protocol;
+	}
+
+	public List<ServerProfile> getServers() {
+		return this.servers;
+	}
+
+	public int getServiceid() {
+		return this.serviceid;
+	}
+
+	public String getServicename() {
+		return this.servicename;
 	}
 
 }

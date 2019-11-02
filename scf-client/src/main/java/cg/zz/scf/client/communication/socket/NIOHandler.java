@@ -25,6 +25,10 @@ public class NIOHandler {
 		return handler;
 	}
 	
+	/**
+	 * 将消息放入异步队列中发送，队列最多支持3W条消息
+	 * @param wd - WindowData
+	 */
 	public void offerWriteData(WindowData wd) {
 		if (getWriteQueueSize() > q_size || getTimeOutQueueSize() > q_size) {
 			logger.warn("writeQueue size > " + q_size);

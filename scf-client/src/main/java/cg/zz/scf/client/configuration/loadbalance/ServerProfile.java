@@ -38,7 +38,7 @@ public class ServerProfile {
 	private float weithtRate;
 	
 	/**
-	 * 解析<add name="enterprise" host="127.0.0.1" port="19000" maxCurrentUser="100" />XML节点并构造ServerProfile对象
+	 * 解析&lt;add name="enterprise" host="127.0.0.1" port="19000" maxCurrentUser="100" /&gt;XML节点并构造ServerProfile对象
 	 * @param node - Node
 	 */
 	public ServerProfile(Node node){
@@ -49,7 +49,7 @@ public class ServerProfile {
 		this.host = attributes.getNamedItem("host").getNodeValue();
 		//端口
 		this.port = Integer.parseInt(attributes.getNamedItem("port").getNodeValue());
-		//权重
+		//权重默认为1
 		Node atribute = attributes.getNamedItem("weithtRate");
 		if (atribute != null)
 			this.weithtRate = Float.parseFloat(atribute.getNodeValue().toString());
