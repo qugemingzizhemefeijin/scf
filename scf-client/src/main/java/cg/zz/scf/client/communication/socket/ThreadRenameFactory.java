@@ -3,6 +3,11 @@ package cg.zz.scf.client.communication.socket;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 线程池生成线程的工厂类，主要就是改线程的名称
+ * @author chengang
+ *
+ */
 public class ThreadRenameFactory implements ThreadFactory {
 	
 	static final AtomicInteger poolNumber = new AtomicInteger(1);

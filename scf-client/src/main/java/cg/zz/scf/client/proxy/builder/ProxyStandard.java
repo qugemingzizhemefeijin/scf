@@ -19,10 +19,22 @@ public class ProxyStandard implements InvocationHandler, Serializable, IProxySta
 	 */
 	private static final long serialVersionUID = -5767110984962101022L;
 	
+	private static final ILog LOGGER = LogFactory.getLogger(ProxyStandard.class);
+	
+	/**
+	 * 被代理的接口类
+	 */
 	private Class<?> interfaceClass;
+	
+	/**
+	 * 被代理方法的调用类
+	 */
 	private MethodCaller methodCaller;
+	
+	/**
+	 * 代理的lookup路径
+	 */
 	private String lookup;
-	private ILog logger = LogFactory.getLogger(ProxyStandard.class);
 	
 	/**
 	 * 构造动态代理对象
@@ -59,7 +71,7 @@ public class ProxyStandard implements InvocationHandler, Serializable, IProxySta
 		long total = end - start;
 		//如果代理方法执行超过了200毫秒，则发出日志警告
 		if (total > 200L) {
-			this.logger.warn("interface:" + this.interfaceClass.getName() + ";class:" + this.lookup + ";method:" + method.getName() + ";invoke time :" + total);
+			LOGGER.warn("interface:" + this.interfaceClass.getName() + ";class:" + this.lookup + ";method:" + method.getName() + ";invoke time :" + total);
 		}
 		return obj;
 	}

@@ -206,7 +206,7 @@ public class Server {
 				}
 			}
 			logger.info("接收数据中.....");
-			//将接受到的数据组装成Protocol对象并返回。真正让但钱业务线程卡住是在这里。（因为netty默认是异步IO，所以需要借助线程的休眠来实现同步的发送接口）
+			//将接受到的数据组装成Protocol对象并返回。真正让但业务线程卡住是在这里。（因为netty默认是异步IO，所以需要借助线程的休眠来实现同步的发送接口）
 			byte[] buffer = socket.receive(p.getSessionID(), currUserCount);
 			Protocol result = Protocol.fromBytes(buffer, socket.isRights(), socket.getDESKey());
 			//如果服务当前状态为测试中，则接收到数据后需要标记服务为正常状态

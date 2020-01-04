@@ -1,5 +1,10 @@
 package cg.zz.scf.client.communication.socket;
 
+/**
+ * 此类无用了
+ * @author chengang
+ *
+ */
 @Deprecated
 public class TimeOut {
 	

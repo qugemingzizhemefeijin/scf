@@ -265,6 +265,10 @@ public class CSocket {
 		return data;
 	}
 	
+	/**
+	 * 处理Socket的数据读取逻辑
+	 * @throws Exception
+	 */
 	protected void frameHandle() throws Exception {
 		if (this.handling) {
 			return;
@@ -274,6 +278,7 @@ public class CSocket {
 			this.handling = true;
 			
 			try {
+				//判断是否正在销毁并且WaitWindows为0（空闲状态）
 				if (this.waitDestroy && isIdle()) {
 					logger.info("Shrinking the connection:" + toString());
 					dispose(true);
@@ -281,10 +286,11 @@ public class CSocket {
 					this.handling = false;
 					return;
 				}
+				//清空读取缓冲
 				this.receiveBuffer.clear();
 				try {
 					int re = this.channel.read(this.receiveBuffer);
-					if (re < 0) {
+					if (re < 0) {//读取到数据异常，关闭连接
 						closeAndDisponse();
 						logger.error("server is close.this socket will close.");
 						
@@ -309,25 +315,30 @@ public class CSocket {
 				do {
 					byte b = this.receiveBuffer.get();
 					this.receiveData.write(b);
+					//这段代码是判断是否到消息的结尾字符了
 					if (b == ProtocolConst.P_END_TAG[this.index]) {
 						this.index += 1;
+						//如果结尾字符的计数=消息结尾字符的长度，则代表本条消息已经读取完毕
 						if (this.index == ProtocolConst.P_END_TAG.length) {
+							//将消息排除头尾特殊字节，拿到消息体
 							byte[] pak = this.receiveData.toByteArray(ProtocolConst.P_START_TAG.length, this.receiveData.size() - ProtocolConst.P_END_TAG.length - ProtocolConst.P_START_TAG.length);
+							//获取消息的sessionId，从维护的Windows中拿出，解锁对应的阻塞线程
 							int pSessionId = ByteConverter.bytesToIntLittleEndian(pak, 5);
 							WindowData wd = this.WaitWindows.get(Integer.valueOf(pSessionId));
 							if (wd != null) {
-								if (wd.getFlag() == 0) {
+								if (wd.getFlag() == 0) {//同步线程解锁
 									wd.setData(pak);
-									wd.getEvent().set();
-								} else if (wd.getFlag() == 1) {
+									wd.getEvent().set();//同步线程的WIndowData对象移除是在同步的Server.request方法中
+								} else if (wd.getFlag() == 1) {//异步线程回调
 									wd.getReceiveHandler().notify(pak);
-									unregisterRec(pSessionId);
+									unregisterRec(pSessionId);//移除注册的WindowData对象
 								}
 							}
 							this.index = 0;
 							this.receiveData.reset();
 						}
 					} else if (this.index != 0) {
+						//这个是如果上面的字符判定不不正确，则判断是否是结尾的字符，如果是则从1开始，否则从新开始正常的结尾字符计数
 						if (b == ProtocolConst.P_END_TAG[0])
 							this.index = 1;
 						else
@@ -336,7 +347,7 @@ public class CSocket {
 				} while (this.receiveBuffer.remaining() > 0);
 			} catch (Exception ex) {
 				this.index = 0;
-			        throw ex;
+			    throw ex;
 			} finally {
 				this.handling = false;
 			}
@@ -444,8 +455,8 @@ public class CSocket {
 	/**
 	 * 获得读取数据的超时时间
 	 * @param baseReadTimeout - 基础的超时时间
-	 * @param queueLen
-	 * @return
+	 * @param queueLen - 当前队列的长度
+	 * @return int
 	 */
 	private int getReadTimeout(int baseReadTimeout, int queueLen) {
 		if (!this.socketConfig.isProtected()) {

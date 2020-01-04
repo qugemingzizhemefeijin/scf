@@ -15,18 +15,26 @@ import cg.zz.scf.protocol.sfp.v1.Protocol;
  */
 public abstract class ReceiveHandler {
 	
-	final CallBackExecutor callBack = CallBackHelper.getInstance();
+	/**
+	 * Server对象
+	 */
 	private Server server;
 	
 	public void setServer(Server server) {
 		this.server = server;
 	}
 	
+	/**
+	 * 在CSocket.frameHandle方法中接收到异步消息后，会调用此方法将接收到的数据传入
+	 * @param buffer - 接收到的数据
+	 * @throws Exception
+	 */
 	public void notify(final byte[] buffer) throws Exception {
 		CallBackExecutor.callBackExe.execute(new Runnable() {
 			public void run() {
 				try {
 					InvokeResult<Object> result = null;
+					//将数据转换为Protocol对象
 					Protocol receiveP = Protocol.fromBytes(buffer);
 					if (ReceiveHandler.this.server.getState() == ServerState.Testing) {
 						ReceiveHandler.this.server.relive();
@@ -34,7 +42,7 @@ public abstract class ReceiveHandler {
 					if (receiveP == null) {
 						throw new Exception("userdatatype error!");
 					}
-					
+					//更具不同的消息类型，封装相应协议
 					if (receiveP.getSdpType() == SDPType.Response) {
 						ResponseProtocol rp = (ResponseProtocol) receiveP.getSdpEntity();
 						result = new InvokeResult<Object>(rp.getResult(), rp.getOutpara());
@@ -52,6 +60,7 @@ public abstract class ReceiveHandler {
 						result = new InvokeResult<Object>(new Exception("userdatatype error!"), null);
 					}
 					
+					//调用回调方法处理
 					if (result.getResult() != null) {
 						ReceiveHandler.this.callBack(result.getResult());
 					}
@@ -69,8 +78,8 @@ public abstract class ReceiveHandler {
 	
 	/**
 	 * 回调函数
-	 * @param paramObject - 参数
+	 * @param result - 服务端返回的对象
 	 */
-	public abstract void callBack(Object paramObject);
+	public abstract void callBack(Object result);
 
 }

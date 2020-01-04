@@ -5,13 +5,13 @@ import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 数据接受者
+ * 数据接受者，全局唯一，在CSocket中注册
  * @author chengang
  *
  */
 public class DataReceiver {
 	
-	private static DataReceiver _DataReceiver = null;
+	private static volatile DataReceiver _DataReceiver = null;
 	private static final Object LockHelper = new Object();
 	private final ReentrantLock lock = new ReentrantLock();
 	private Worker worker = null;
