@@ -175,7 +175,7 @@ public class ServiceConfig {
 	
 	/**
 	 * 抛出对应的异常信息
-	 * @param i - 信息类型
+	 * @param i - 信息类型（这里用个枚举会更好）
 	 * @param serviceName - 服务名称
 	 * @throws Exception
 	 */

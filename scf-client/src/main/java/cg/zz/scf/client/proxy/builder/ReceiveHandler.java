@@ -78,7 +78,7 @@ public abstract class ReceiveHandler {
 	
 	/**
 	 * 回调函数
-	 * @param result - 服务端返回的对象
+	 * @param result - 服务端返回的对象，实际是InvokeResult对象中的Result属性
 	 */
 	public abstract void callBack(Object result);
 

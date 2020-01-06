@@ -7,7 +7,7 @@ import cg.zz.scf.client.SCFConst;
 import cg.zz.scf.client.utility.helper.TimeSpanHelper;
 
 /**
- * 服务配置
+ * 服务地址，端口等配置信息属性
  *
  */
 public class ServerProfile {

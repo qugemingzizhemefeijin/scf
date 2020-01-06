@@ -29,6 +29,10 @@ public class ServerChecker {
 	private static Thread checker = null;
 	private static long checkerStartTime;
 	
+	/**
+	 * 将服务加入到待检测列表中，并且启动线程来检查服务的连通
+	 * @param serv - Server
+	 */
 	public static void check(Server serv) {
 		serv.setState(ServerState.Testing);
 		
@@ -43,6 +47,7 @@ public class ServerChecker {
 		if (checker == null || checker.getState() == Thread.State.TERMINATED) {
 			synchronized (locker) {
 				if (checker == null || checker.getState() == Thread.State.TERMINATED) {
+					//这里实际上用一个单线程的线程池会更好
 					checker = createChecker();
 					checkerStartTime = System.currentTimeMillis();
 					checker.start();
@@ -81,6 +86,10 @@ public class ServerChecker {
 		return false;
 	}
 	
+	/**
+	 * 创建线程对象
+	 * @return Thread
+	 */
 	private static Thread createChecker() {
 		Thread t = new Thread(new Runnable() {
 			public void run() {
@@ -94,6 +103,7 @@ public class ServerChecker {
 							for (int i = 0; i < ServerChecker.checkList.size(); i++) {
 								Server serv = ServerChecker.checkList.get(i);
 								if (serv != null) {
+									//这里根据检查的结果，设置服务是死了还是正常
 									if (ServerChecker.test(serv)) {
 										ServerChecker.checkList.remove(i);
 										serv.setState(ServerState.Normal);
