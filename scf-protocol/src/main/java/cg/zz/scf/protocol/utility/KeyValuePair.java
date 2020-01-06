@@ -14,9 +14,15 @@ import cg.zz.scf.serializer.component.annotation.SCFSerializable;
 @SCFSerializable(name="RpParameter")
 public class KeyValuePair implements Serializable {
 	
+	/**
+	 * key名称
+	 */
 	@SCFMember(name="name", sortId=1)
 	private String key;
 	
+	/**
+	 * value值
+	 */
 	@SCFMember(sortId=2)
 	private Object value;
 	

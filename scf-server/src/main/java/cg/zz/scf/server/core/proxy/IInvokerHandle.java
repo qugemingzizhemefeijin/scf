@@ -11,9 +11,9 @@ public interface IInvokerHandle {
 	
 	/**
 	 * 调用方法
-	 * @param paramSCFContext - SCFContext
+	 * @param context - SCFContext
 	 * @throws Exception
 	 */
-	public void invoke(SCFContext paramSCFContext) throws Exception;
+	public void invoke(SCFContext context) throws Exception;
 
 }

@@ -52,7 +52,7 @@ public class AsyncWorker extends Thread {
 	private boolean isStop = false;
 
 	/**
-	 * 超时开关
+	 * 是否执行的具有超时特性的任务
 	 */
 	private boolean timeoutEffect = false;
 	
@@ -98,14 +98,14 @@ public class AsyncWorker extends Thread {
 	private void execNoTimeLimitTask() {
 		AsyncTask task = null;
 		try {
-			task = (AsyncTask)this.taskQueue.poll(POLL_DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
+			task = this.taskQueue.poll(POLL_DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 			if (null != task) {
 				//查看任务是否超过了qtimeout
 				if (System.currentTimeMillis() - task.getAddTime() > task.getQtimeout()) {
 					task.getHandler().exceptionCaught(new TimeoutException(this.threadFactoryName + " async task timeout!" + " Host ip:" + localIp));
 					return;
 				}
-				//如果队列
+				//任务在队列中的时间过长，打印告警信息
 				if (task.getInQueueTime() != -1 && (System.currentTimeMillis() - task.getAddTime() >= task.getInQueueTime())) {
 					logger.error(this.threadFactoryName + " The task inQueue time :" + (System.currentTimeMillis() - task.getAddTime()));
 				}
@@ -124,7 +124,7 @@ public class AsyncWorker extends Thread {
 	 */
 	private void execTimeoutTask() {
 		try {
-			final AsyncTask task = (AsyncTask)this.taskQueue.poll(POLL_DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
+			final AsyncTask task = this.taskQueue.poll(POLL_DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
 			if (null != task) {
 				//查看任务是否超过了qtimeout
 				if (System.currentTimeMillis() - task.getAddTime() > task.getQtimeout()) {

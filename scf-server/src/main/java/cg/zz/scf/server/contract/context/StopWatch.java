@@ -34,7 +34,7 @@ public class StopWatch {
 	/**
 	 * 监控计数器
 	 */
-	private Map<String, PerformanceCounter> mapCounter = new HashMap<String , PerformanceCounter>();
+	private Map<String, PerformanceCounter> mapCounter = new HashMap<>();
 	
 	/**
 	 * 开始默认计数器
@@ -68,7 +68,7 @@ public class StopWatch {
 	}
 	
 	/**
-	 * 暂时指定名称的计数器
+	 * 暂停指定名称的计数器
 	 * @param key - 名称
 	 */
 	public void stop(String key) {

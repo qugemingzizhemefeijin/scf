@@ -23,7 +23,7 @@ import cg.zz.utility.async.AsyncInvoker;
 import cg.zz.utility.async.IAsyncHandler;
 
 /**
- * 异步返回
+ * 异步返回（这个方法看着到处都是BUG，有啥用）
  * @author chengang
  *
  */
@@ -33,13 +33,24 @@ public class AsynBack {
 	
 	private static AsynBack asyn = null;
 	
+	/**
+	 * 任务默认的超时时间，1秒
+	 */
 	private static int taskTimeOut = 1000;
+	
+	/**
+	 * 任务默认在队列中的时间，
+	 */
 	private static int inQueueTime = -1;
 	private static HttpThreadLocal httpThreadLocal;
-	public static Map<String, Integer> asynMap = new ConcurrentHashMap<String , Integer>();
+	
+	/**
+	 * 异步任务描述信息标识集合，主要用于判断当前被请求的方法是否是异步任务，在ProxyClassCreater类中会往里面放入方法描述信息
+	 */
+	public static Map<String, Integer> asynMap = new ConcurrentHashMap<>();
 	public static final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();//CPU数量
 	private static AsyncInvoker asyncInvoker = AsyncInvoker.getInstance(THREAD_COUNT, false, "Back Async Worker");
-	public static Map<Integer, SCFContext> contextMap = new ConcurrentHashMap<Integer , SCFContext>();
+	public static Map<Integer, SCFContext> contextMap = new ConcurrentHashMap<>();
 	public static final CallBackUtil callBackUtil = new CallBackUtil();
 	
 	static {
@@ -70,6 +81,7 @@ public class AsynBack {
 	 * @param obj - Object
 	 */
 	public static void send(int key, final Object obj) {
+		//这个方法找了半天，好像只有一个地方cg.zz.scf.server.core.proxy.CallBackUtil调用，并且send Object是个Exception方法
 		//异步调用请求上下文
 		final SCFContext context = contextMap.get(Integer.valueOf(key));
 		if (context == null) {
@@ -77,7 +89,7 @@ public class AsynBack {
 		}
 		//将此请求设置为删除状态
 		synchronized (context) {
-			if ((context == null) || (context.isDel())) {
+			if (context == null || context.isDel()) {
 				return;
 			}
 			context.setDel(true);
@@ -91,18 +103,18 @@ public class AsynBack {
 					exceptionCaught((Throwable)obj);
 					return null;
 				}
-				
+				//这下面的代码应该都调用不到
 				Protocol protocol = context.getScfRequest().getProtocol();
-			        SCFResponse response = new SCFResponse(obj, null);
-			        
-			        protocol.setSdpEntity(new ResponseProtocol(response.getReturnValue(), null));
-			        
-			        for (IFilter f : Global.getInstance().getGlobalResponseFilterList()) {
-			        	if (context.getExecFilter() == ExecFilterType.All || context.getExecFilter() == ExecFilterType.ResponseOnly) {
-			        		f.filter(context);
-			        	}
-			        }
-			        return context;
+		        SCFResponse response = new SCFResponse(obj, null);
+		        
+		        protocol.setSdpEntity(new ResponseProtocol(response.getReturnValue(), null));
+		        
+		        for (IFilter f : Global.getInstance().getGlobalResponseFilterList()) {
+		        	if (context.getExecFilter() == ExecFilterType.All || context.getExecFilter() == ExecFilterType.ResponseOnly) {
+		        		f.filter(context);
+		        	}
+		        }
+		        return context;
 			}
 
 			@Override
@@ -128,7 +140,7 @@ public class AsynBack {
 						context.setScfResponse(respone);
 					}
 
-					if ((e instanceof TimeoutException)) {
+					if (e instanceof TimeoutException) {
 						try {
 							AbandonCount.messageRecv();
 						} catch (Exception ex) {

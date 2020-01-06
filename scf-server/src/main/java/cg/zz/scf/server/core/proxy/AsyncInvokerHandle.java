@@ -79,6 +79,7 @@ public class AsyncInvokerHandle extends InvokerBase {
 						httpThreadLocal.set(context.getHttpContext());
 					}
 					logger.debug("sessionId : " + context.getSessionID());
+					//调用真正的服务接口
 					doInvoke(context);
 				}
 				
@@ -164,7 +165,8 @@ public class AsyncInvokerHandle extends InvokerBase {
 				} finally {
 					SCFContext.removeThreadLocal();
 					AsyncInvokerHandle.logger.error("AsynBack.contextMap.remove " + context.getSessionID());
-				        AsynBack.contextMap.remove(Integer.valueOf(context.getSessionID()));
+					//这里异常的话，将消息从AsynBack移除，但是CallBackUtil中会获取SCFContext.isDel，那可能会报空指针呀？
+					AsynBack.contextMap.remove(Integer.valueOf(context.getSessionID()));
 				}
 				
 				logger.info("返回数据!!!!!!!!!!!!!!!!!!!!!!!!!!");

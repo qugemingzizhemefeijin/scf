@@ -8,7 +8,7 @@ package cg.zz.utility.async;
 public abstract interface IAsyncHandler {
 	
 	/**
-	 * 执行操作
+	 * 在接收到客户端请求的时候，执行方法调用操作
 	 * @return Object
 	 * @throws Throwable
 	 */

@@ -7,14 +7,34 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 主要用于扫描Jar包，获取Class类集合，判断Class类是否实现了指定的接口等工具方法
+ * @author chengang
+ *
+ */
 public final class ClassHelper {
+	
+	private static final Map<String , Class<?>> BASIC_CLASS_MAP = new HashMap<>();
+	
+	static {
+		BASIC_CLASS_MAP.put("boolean", Boolean.class);
+		BASIC_CLASS_MAP.put("char", Character.class);
+		BASIC_CLASS_MAP.put("byte", Byte.class);
+		BASIC_CLASS_MAP.put("short", Short.class);
+		BASIC_CLASS_MAP.put("int", Integer.class);
+		BASIC_CLASS_MAP.put("long", Long.class);
+		BASIC_CLASS_MAP.put("float", Float.class);
+		BASIC_CLASS_MAP.put("double", Double.class);
+	}
 	
 	/**
 	 * 从jar包中获取所有的类Class
@@ -208,22 +228,9 @@ public final class ClassHelper {
 	 * @throws ClassNotFoundException
 	 */
 	public static Class<?> GetClassForName(String name) throws ClassNotFoundException {
-		if (name.equals("boolean"))
-			return Boolean.class;
-		if (name.equals("char"))
-			return Character.class;
-		if (name.equals("byte"))
-			return Byte.class;
-		if (name.equals("short"))
-			return Short.class;
-		if (name.equals("int"))
-			return Integer.class;
-		if (name.equals("long"))
-			return Long.class;
-		if (name.equals("float"))
-			return Float.class;
-		if (name.equals("double")) {
-			return Double.class;
+		Class<?> cls = BASIC_CLASS_MAP.get(name);
+		if(cls != null) {
+			return cls;
 		}
 		return Class.forName(name);
 	}

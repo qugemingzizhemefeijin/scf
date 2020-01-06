@@ -42,7 +42,7 @@ public class ObjectSerializer extends SerializerBase {
 			Object value = f.get(obj);
 			if (value == null) {
 				SerializerFactory.GetSerializer(null).WriteObject(null, outStream);
-			} else if ((value instanceof ISCFSerializer)) {
+			} else if (value instanceof ISCFSerializer) {
 				((ISCFSerializer) value).Serialize(outStream);
 			} else {
 				Class<?> valueType = value.getClass();

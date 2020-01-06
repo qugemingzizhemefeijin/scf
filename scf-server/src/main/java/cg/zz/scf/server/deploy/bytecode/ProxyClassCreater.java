@@ -59,57 +59,58 @@ public class ProxyClassCreater {
 					ctProxyClass.addInterface(localProxy);
 					
 					//创建代理类的静态自身属性
-					CtField proxyField = CtField.make("private static " + sessionBean.getInterfaceName() + 
-							" serviceProxy = new " + implClassName + "();", ctProxyClass);
-				        ctProxyClass.addField(proxyField);
-				          
-				        List<MethodInfo> methodList = sessionBean.getInterfaceClass().getMethodList();
-				        Method[] methodAry = new Method[methodList.size()];
-				        for (int i = 0 , size = methodList.size(); i < size; i++) {
-				        	methodAry[i] = methodList.get(i).getMethod();
-				        }
-				        
-				        List<String> uniqueNameList = new ArrayList<String>();
-				        List<Method> uniqueMethodList = new ArrayList<Method>();
-				        List<Method> allMethodList = new ArrayList<Method>();
-				        for (Method m : methodAry) {
-				        	//方法必须是public 或者 protected 才被代理
-				        	if(Modifier.isPublic(m.getModifiers()) || Modifier.isProtected(m.getModifiers())){
-				        		//如果方法有异步的注解。需要加入到异步的Map中
-				        		OperationAsyn oa = (OperationAsyn)m.getAnnotation(OperationAsyn.class);
-				        		if (oa != null) {
-				        			StringBuffer sb = new StringBuffer();
-				        		        sb.append(lookup);
-				        		        sb.append(m.getName());
-				        		        sb.append(getParas(m));
-				        		        AsynBack.asynMap.put(sb.toString(), Integer.valueOf(1));
-				        		        logger.info("asynBack asynMap's key :" + sb.toString());
-				        		}
-				        		
-				        		if(!uniqueNameList.contains(m.getName())){
-				        			uniqueNameList.add(m.getName());
-				        			uniqueMethodList.add(m);
-				        		}
-				        		allMethodList.add(m);
-				        	}
-				        }
-				        
-				        //method
-				        for(Method m : uniqueMethodList) {
-				        	logger.debug("create method:" + m.getName());
-				        	String methodStr = createMethods(proxyClassName, m.getName(), allMethodList, uniqueNameList);
-				        	logger.debug("method("+m.getName()+") source code:"+methodStr);
-				        	CtMethod methodItem = CtMethod.make(methodStr, ctProxyClass);
-						ctProxyClass.addMethod(methodItem);
-				        }
-				        
-				        //invoke
-				        String invokeMethod = createInvoke(proxyClassName, uniqueNameList);
-				        logger.debug("create invoke method:" + invokeMethod);
-				        CtMethod invoke = CtMethod.make(invokeMethod, ctProxyClass);
-				        ctProxyClass.addMethod(invoke);
-				        
-				        clsList.add(new ClassFile(proxyClassName, ctProxyClass.toBytecode()));
+					CtField proxyField = CtField.make("private static " + sessionBean.getInterfaceName() + " serviceProxy = new " + implClassName + "();", ctProxyClass);
+			        ctProxyClass.addField(proxyField);
+			          
+			        List<MethodInfo> methodList = sessionBean.getInterfaceClass().getMethodList();
+			        Method[] methodAry = new Method[methodList.size()];
+			        for (int i = 0 , size = methodList.size(); i < size; i++) {
+			        	methodAry[i] = methodList.get(i).getMethod();
+			        }
+			        
+			        List<String> uniqueNameList = new ArrayList<String>();
+			        List<Method> uniqueMethodList = new ArrayList<Method>();
+			        List<Method> allMethodList = new ArrayList<Method>();
+			        for (Method m : methodAry) {
+			        	//方法必须是public 或者 protected 才被代理
+			        	if(Modifier.isPublic(m.getModifiers()) || Modifier.isProtected(m.getModifiers())){
+			        		//如果方法有异步的注解。需要加入到异步的Map中
+			        		//实际上scf的调用都是异步处理的，只是异步/同步方法通过不同的AsyncInvoker来调用的而已
+			        		OperationAsyn oa = m.getAnnotation(OperationAsyn.class);
+			        		if (oa != null) {
+			        			StringBuffer sb = new StringBuffer();
+		        		        sb.append(lookup);
+		        		        sb.append(m.getName());
+		        		        sb.append(getParas(m));
+		        		        //将异步调用的方法描述信息存放到AsynBack.asynMap中（实际这里直接用set会更好，map总感觉很奇怪）
+		        		        AsynBack.asynMap.put(sb.toString(), Integer.valueOf(1));
+		        		        logger.info("asynBack asynMap's key :" + sb.toString());
+			        		}
+			        		
+			        		if(!uniqueNameList.contains(m.getName())){
+			        			uniqueNameList.add(m.getName());
+			        			uniqueMethodList.add(m);
+			        		}
+			        		allMethodList.add(m);
+			        	}
+			        }
+			        
+			        //method
+			        for(Method m : uniqueMethodList) {
+			        	logger.debug("create method:" + m.getName());
+			        	String methodStr = createMethods(proxyClassName, m.getName(), allMethodList, uniqueNameList);
+			        	logger.debug("method("+m.getName()+") source code:"+methodStr);
+			        	CtMethod methodItem = CtMethod.make(methodStr, ctProxyClass);
+			        	ctProxyClass.addMethod(methodItem);
+			        }
+			        
+			        //invoke
+			        String invokeMethod = createInvoke(proxyClassName, uniqueNameList);
+			        logger.debug("create invoke method:" + invokeMethod);
+			        CtMethod invoke = CtMethod.make(invokeMethod, ctProxyClass);
+			        ctProxyClass.addMethod(invoke);
+			        
+			        clsList.add(new ClassFile(proxyClassName, ctProxyClass.toBytecode()));
 				}
 			}
 		}

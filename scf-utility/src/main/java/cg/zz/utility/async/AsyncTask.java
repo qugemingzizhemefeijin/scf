@@ -39,7 +39,7 @@ public class AsyncTask {
 	
 	/**
 	 * 构造异步任务
-	 * @param timeout - 超时时间(单位：豪秒)
+	 * @param timeout - 超时时间，会抛出TimeoutException异常(单位：豪秒)
 	 * @param handler - 执行句柄
 	 */
 	public AsyncTask(int timeout, IAsyncHandler handler) {
@@ -55,9 +55,9 @@ public class AsyncTask {
 	
 	/**
 	 * 构造异步任务
-	 * @param timeout - 超时时间(单位：豪秒)
+	 * @param timeout - 超时时间，会抛出TimeoutException异常(单位：豪秒)
 	 * @param handler - 执行句柄
-	 * @param inQueueTime - 在队列的时间
+	 * @param inQueueTime - 允许在队列的时间（如果超过这个时间，会打印警告语句）
 	 */
 	public AsyncTask(int timeout, IAsyncHandler handler, int inQueueTime) {
 		if (timeout < 0) {

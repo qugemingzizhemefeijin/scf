@@ -59,14 +59,15 @@ public final class CallBackUtil {
 						}
 						
 						if (System.currentTimeMillis() - wd.getTime() > CallBackUtil.this.taskTimeOut) {
-							AsynBack.send(wd.getSessionID(), new Exception("wait other server recive timeout.wait time is " + CallBackUtil.this.taskTimeOut));
+							AsynBack.send(wd.getSessionID(), new Exception("wait other server receive timeout.wait time is " + CallBackUtil.this.taskTimeOut));
+							//这里再放回去有啥用？？
+							//send中会将SCFContext的isDel设置为true，肯定会走上面的contextMap.remove逻辑，感觉没啥意义。。
 							CallBackUtil.this.offer(wd);
 							continue;
 						}
 						
 						CallBackUtil.this.offer(wd);
 						Thread.sleep(1L);
-						continue;
 					}
 				} catch (InterruptedException e) {
 					try {

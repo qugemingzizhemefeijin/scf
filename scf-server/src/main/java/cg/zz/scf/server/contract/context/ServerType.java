@@ -7,10 +7,19 @@ package cg.zz.scf.server.contract.context;
  */
 public enum ServerType {
 	
+	/**
+	 * HTTP服务
+	 */
 	HTTP,
 	
+	/**
+	 * TCP服务
+	 */
 	TCP,
 	
+	/**
+	 * TELNET服务
+	 */
 	TELNET;
 
 }

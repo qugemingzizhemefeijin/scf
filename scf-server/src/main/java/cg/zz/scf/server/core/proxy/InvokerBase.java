@@ -70,6 +70,7 @@ public abstract class InvokerBase implements IInvokerHandle {
 				}
 			}
 			
+			//这里最好优化为如果当前为debug模式，则拼接和打印，否则白浪费资源
 			logger.debug(sbInvokerMsg.toString());
 			logger.debug(sbIsAsynMsg.toString());
 			logger.debug("begin get proxy factory");
@@ -94,29 +95,31 @@ public abstract class InvokerBase implements IInvokerHandle {
 				//添加一个监控的计时器
 				sw.startNew(swInvoderKey, sbInvokerMsg.toString());
 				sw.setFromIP(context.getChannel().getRemoteIP());
-			        sw.setLocalIP(context.getChannel().getLocalIP());
-			        SCFContext.setThreadLocal(context);
-			        
-			        //如果可以被异步调用，则放到到异步返回的容器中
-			        if (AsynBack.asynMap.containsKey(sbIsAsynMsg.toString())) {
-			        	int sessionid = SystemUtils.createSessionId();
-			                context.setAsyn(true);
-			                context.setSessionID(sessionid);
-			                AsynBack.contextMap.put(Integer.valueOf(sessionid), context);
-			                AsynBack.callBackUtil.offer(new WData(sessionid, System.currentTimeMillis()));
-			        }
-			        
-			        SCFResponse scfResponse = localProxy.invoke(context);
-			        
-			        //如果是异步的则直接返回
-			        if (context.isAsyn()) return;
-			        
-			        sw.stop(swInvoderKey);
-			        
-			        logger.debug("end localProxy.invoke");
-			        context.setScfResponse(scfResponse);
-			        response = createResponse(scfResponse);
-			        logger.debug("localProxy.invoke finish");
+		        sw.setLocalIP(context.getChannel().getLocalIP());
+		        SCFContext.setThreadLocal(context);
+		        
+		        //如果是异步调用，则放到到异步发送消息的线程池中
+		        if (AsynBack.asynMap.containsKey(sbIsAsynMsg.toString())) {
+		        	int sessionid = SystemUtils.createSessionId();
+	                context.setAsyn(true);
+	                context.setSessionID(sessionid);
+	                AsynBack.contextMap.put(Integer.valueOf(sessionid), context);
+	                AsynBack.callBackUtil.offer(new WData(sessionid, System.currentTimeMillis()));
+		        }
+		        
+		        SCFResponse scfResponse = localProxy.invoke(context);
+		        
+		        //如果是异步的则直接返回
+		        if (context.isAsyn()) {
+		        	return;
+		        }
+		        
+		        sw.stop(swInvoderKey);
+		        
+		        logger.debug("end localProxy.invoke");
+		        context.setScfResponse(scfResponse);
+		        response = createResponse(scfResponse);
+		        logger.debug("localProxy.invoke finish");
 			}
 		} catch (ServiceFrameException sfe) {
 			logger.error("ServiceFrameException when invoke service fromIP:" + context.getChannel().getRemoteIP() + "  toIP:" + context.getChannel().getLocalIP(), sfe);
