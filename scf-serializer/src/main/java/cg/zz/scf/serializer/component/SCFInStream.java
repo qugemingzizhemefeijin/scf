@@ -22,7 +22,7 @@ public class SCFInStream extends ByteArrayInputStream {
 	/**
 	 * 缓存池
 	 */
-	private Map<Integer, Object> _RefPool = new HashMap<Integer, Object>();
+	private Map<Integer, Object> _RefPool = new HashMap<>();
 	
 	public SCFInStream(byte[] buffer) {
 		super(buffer);

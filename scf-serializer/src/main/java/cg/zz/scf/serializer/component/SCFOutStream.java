@@ -18,14 +18,14 @@ public class SCFOutStream extends ByteArrayOutputStream {
 	/**
 	 * 写入存储的对象池
 	 */
-	private Map<Integer, Object> _RefPool = new HashMap<Integer, Object>();
+	private Map<Integer, Object> _RefPool = new HashMap<>();
 	
 	private int hashCode = 1000;
 	
 	/**
 	 * 存储对象和hashCode
 	 */
-	private Map<Object, Integer> _objMap = new HashMap<Object, Integer>();
+	private Map<Object, Integer> _objMap = new HashMap<>();
 	
 	public boolean WriteRef(Object obj) throws IOException {
 		if (obj == null) {
@@ -68,8 +68,8 @@ public class SCFOutStream extends ByteArrayOutputStream {
 		if (obj == null) {
 			return 0;
 		}
-		if ((this._objMap.containsKey(obj)) && (obj == this._objMap.get(obj))) {
-			return ((Integer) this._objMap.get(obj)).intValue();
+		if (this._objMap.containsKey(obj) && obj == this._objMap.get(obj)) {
+			return this._objMap.get(obj).intValue();
 		}
 		this._objMap.put(obj, Integer.valueOf(++this.hashCode));
 		return this.hashCode;

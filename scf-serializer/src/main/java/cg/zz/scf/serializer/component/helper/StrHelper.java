@@ -40,10 +40,7 @@ public class StrHelper {
 	 * @return boolean
 	 */
 	public static boolean isEmptyOrNull(String str) {
-		if (str == null || "".equals(str)) {
-			return true;
-		}
-		return false;
+		return str == null || "".equals(str);
 	}
 
 }

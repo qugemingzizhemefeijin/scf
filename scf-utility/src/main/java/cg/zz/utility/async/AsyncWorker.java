@@ -52,7 +52,7 @@ public class AsyncWorker extends Thread {
 	private boolean isStop = false;
 
 	/**
-	 * 是否执行的具有超时特性的任务
+	 * 是否执行的具有超时特性的任务，看代码此属性一直为false，意味着永远走execNoTimeLimitTask方法
 	 */
 	private boolean timeoutEffect = false;
 	
@@ -131,6 +131,7 @@ public class AsyncWorker extends Thread {
 					task.getHandler().exceptionCaught(new TimeoutException(this.threadFactoryName + "async task timeout!" + " Host ip:" + localIp));
 					return;
 				}
+				//这里代码还是有点问题的，如果下面异常了await解禁了，实际还是会被执行的。
 				final CountDownLatch cdl = new CountDownLatch(1);
 				this.executor.execute(new Runnable(){
 

@@ -51,8 +51,9 @@ public final class FileHelper {
 					}
 				}
 
-				if (isAdd)
+				if (isAdd) {
 					fileList.add(files[i]);
+				}
 			}
 		}
 	}
