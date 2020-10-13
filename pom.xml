@@ -35,7 +35,7 @@
 		<slf4j_log4j_version>1.6.6</slf4j_log4j_version>
 		
 		<!-- Test libs -->
-		<junit_version>4.12</junit_version>
+		<junit_version>4.13.1</junit_version>
 
 		<!-- Build args -->
 		<argline>-server -Xms64m -Xmx64m -XX:PermSize=64m -XX:MaxPermSize=64m</argline>
