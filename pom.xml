@@ -212,18 +212,6 @@
 		</plugins>
 	</build>
 
-	<developers>
-		<developer>
-			<name>ChenGang</name>
-			<id>ChenGang</id>
-			<email>172577882@qq.com</email>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+8</timezone>
-		</developer>
-	</developers>
-
 	<profiles>
 		<profile>
 			<id>test</id>
