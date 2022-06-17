@@ -28,7 +28,7 @@
 		<antlr_version>2.7.4</antlr_version>
 		<javassist_version>3.12.0.GA</javassist_version>
 		<netty_version>3.2.9.Final</netty_version>
-		<fastjson_version>1.2.61</fastjson_version>
+		<fastjson_version>1.2.83</fastjson_version>
 		
 		<!-- log libs -->
 		<log4j_version>1.2.17</log4j_version>
